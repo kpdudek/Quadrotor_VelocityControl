@@ -15,8 +15,9 @@ set_vel = TwistStamped()
 current_state = State()
 
 def obstacles():
+	global o,r
 	o = []
-	r = .25
+	r = .4
 	o.append((1,1,1.5))
 
 	return o,r
@@ -49,19 +50,47 @@ def pos_sub_callback(pose_sub_data):
 	y_c = y_error# / dist
 	z_c = z_error# / dist
 
-	# Publist to TwistStamped
-	set_vel.twist.linear.x = .5*x_c
-	set_vel.twist.linear.y = .5*y_c
-	set_vel.twist.linear.z = .7*z_c
+	# Velocity vector to get to goal
+	gx = .5*x_c
+	gy = .5*y_c
+	gz = .7*z_c
 
+	### Distance to obstacle
+	c = .2 # Repulsion force
+	o_dists = []
+	for i in o:
+		x_error = (i[0] - x) - r
+		y_error = (i[1] - y) - r
+		z_error = (i[2] - z) - r
+
+		o_x = -c/(np.sign(x_error)*(x_error**2))
+		o_y = -c/(np.sign(y_error)*(y_error**2))
+		o_z = -c/(np.sign(z_error)*(z_error**2))
+
+		o_dists.append((o_x,o_y,o_z))
+
+	# Velocity commands x,y,z
+	# Initially equal to the attractive force of the goal
+	cx = gx
+	cy = gy
+	cz = gz
+	# Add each component from the repulsive forces
+	for y in o_dists:
+		cx += y[0]
+		cy += y[1]
+		cz += y[2]
+
+	# Set the message values to the velocity commands
+	set_vel.twist.linear.x = cx
+	set_vel.twist.linear.y = cy
+	set_vel.twist.linear.z = cz
+	# Set limits on the velocity the quad can have
 	if abs(set_vel.twist.linear.x) > 2:
 		set_vel.twist.linear.x = np.sign(set_vel.twist.linear.z)*2
 	if abs(set_vel.twist.linear.y) > 2:
-        set_vel.twist.linear.y = np.sign(set_vel.twist.linear.y)*2
+		set_vel.twist.linear.y = np.sign(set_vel.twist.linear.y)*2
 	if abs(set_vel.twist.linear.z) > 2:
-        set_vel.twist.linear.z = np.sign(set_vel.twist.linear.z)*2
-
-
+		set_vel.twist.linear.z = np.sign(set_vel.twist.linear.z)*2
 
 	#Publish the commanded velocity
 	vel_pub.publish(set_vel)
@@ -85,6 +114,7 @@ def main():
 	# Set the timeout for the ROS service checks
 	service_timeout = 30
         rospy.loginfo("waiting for ROS services")
+
 	# Ensure all services are running, and switch Quad to offboard
 	while current_state.mode != "OFFBOARD" or not current_state.armed:
         	arm = rospy.ServiceProxy('/mavros/cmd/arming', mavros_msgs.srv.CommandBool)
