@@ -17,8 +17,8 @@ current_state = State()
 def obstacles():
 	global o,r
 	o = []
-	r = .4
-	o.append((1,1,1.5))
+	r = .25
+	o.append((.5,.5,1.5))
 
 	return o,r
 
@@ -56,16 +56,16 @@ def pos_sub_callback(pose_sub_data):
 	gz = .7*z_c
 
 	### Distance to obstacle
-	c = .2 # Repulsion force
+	c = .0005 # Repulsion force
 	o_dists = []
 	for i in o:
 		x_error = (i[0] - x) - r
 		y_error = (i[1] - y) - r
 		z_error = (i[2] - z) - r
 
-		o_x = -c/(np.sign(x_error)*(x_error**2))
-		o_y = -c/(np.sign(y_error)*(y_error**2))
-		o_z = -c/(np.sign(z_error)*(z_error**2))
+		o_x = -c/np.power(x_error,3)
+		o_y = -c/np.power(y_error,3)
+		o_z = -c/np.power(z_error,3)
 
 		o_dists.append((o_x,o_y,o_z))
 
