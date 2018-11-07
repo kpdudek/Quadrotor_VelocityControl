@@ -2,14 +2,16 @@
 
 firm=$HOME/Firmware
 
-cd $firm
 
-x-terminal-emulator -e $HOME/launch_build_gazebo.sh & x-terminal-emulator -e $HOME/launch_ros_gazebo.sh & x-terminal-emulator -e $HOME/launch_mavros.sh
+roscore &>/dev/null &
 
-#x-terminal-emulator -e $HOME/launch_ros_gazebo.sh
+sleep 6
 
-#x-terminal-emulator -e $HOME/launch_mavros.sh
+x-terminal-emulator -e $HOME/launch_build_gazebo.sh &>/dev/null &
+x-terminal-emulator -e $HOME/launch_ros_gazebo.sh &>/dev/null &
+x-terminal-emulator -e $HOME/launch_mavros.sh &>/dev/null &
 
+cd $HOME/Quadrotor_VelocityControl/Velocity_Control/
 
 
 

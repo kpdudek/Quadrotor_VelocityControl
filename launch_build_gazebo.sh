@@ -1,6 +1,5 @@
 #!/bin/bash
 
-
 firm=$HOME/Firmware
 
 cd $firm
