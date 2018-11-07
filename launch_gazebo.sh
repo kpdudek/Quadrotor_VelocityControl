@@ -1,15 +1,14 @@
 #!/bin/bash
 
-path=/home/kurt
-firm=/home/kurt/Firmware
+firm=$HOME/Firmware
 
 cd $firm
 
-x-terminal-emulator -e $path/launch_build_gazebo.sh
+x-terminal-emulator -e $HOME/launch_build_gazebo.sh
 
-x-terminal-emulator -e $path/launch_ros_gazebo.sh
+x-terminal-emulator -e $HOME/launch_ros_gazebo.sh
 
-x-terminal-emulator -e $path/launch_mavros.sh
+x-terminal-emulator -e $HOME/launch_mavros.sh
 
 
 
