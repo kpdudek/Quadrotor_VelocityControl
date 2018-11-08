@@ -3,7 +3,7 @@
 firm=$HOME/Firmware
 
 
-roscore &>/dev/null &
+roscore & #>/dev/null &
 
 sleep 6
 

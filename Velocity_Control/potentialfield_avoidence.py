@@ -17,8 +17,8 @@ current_state = State()
 def obstacles():
 	global o,r
 	o = []
-	r = .25
-	o.append((.5,.5,1.5))
+	r = .5
+	o.append((1,1,1.5))
 
 	return o,r
 
@@ -42,34 +42,30 @@ def pos_sub_callback(pose_sub_data):
 	x_error = xg - x
 	y_error = yg - y
 	z_error = zg - z
-	#dist = math.sqrt(x_error**2 + y_error**2 + z_error**2)
-	#print(dist)
-
-	# Unit vecotor, variable means 'direction_command'
-	x_c = x_error# / dist
-	y_c = y_error# / dist
-	z_c = z_error# / dist
 
 	# Velocity vector to get to goal
-	gx = .5*x_c
-	gy = .5*y_c
-	gz = .7*z_c
+	gx = .5*x_error
+	gy = .5*y_error
+	gz = .7*z_error
 
 	### Distance to obstacle
 	c = .0005 # Repulsion force
+	k = 1.3
+	# Vector of tuples corresponding to repulsive vectors
 	o_dists = []
 	for i in o:
 		x_error = (i[0] - x) - r
 		y_error = (i[1] - y) - r
 		z_error = (i[2] - z) - r
 
-		o_x = -c/np.power(x_error,3)
-		o_y = -c/np.power(y_error,3)
-		o_z = -c/np.power(z_error,3)
+
+		o_x = -c/np.power(x_error*k,3)
+		o_y = -c/np.power(y_error*k,3)
+		o_z = -c/np.power(z_error*k,3)
 
 		o_dists.append((o_x,o_y,o_z))
 
-	# Velocity commands x,y,z
+	# Velocity commands x,y,z sent to quadrotor
 	# Initially equal to the attractive force of the goal
 	cx = gx
 	cy = gy
@@ -80,17 +76,19 @@ def pos_sub_callback(pose_sub_data):
 		cy += y[1]
 		cz += y[2]
 
+
+	# Set limits on the velocity the quad can have
+	if abs(cx) > 2:
+		cx = np.sign(cx)*2
+	if abs(cy) > 2:
+		cy = np.sign(cy)*2
+	if abs(cz) > 2:
+		cz = np.sign(cz)*2
+
 	# Set the message values to the velocity commands
 	set_vel.twist.linear.x = cx
 	set_vel.twist.linear.y = cy
 	set_vel.twist.linear.z = cz
-	# Set limits on the velocity the quad can have
-	if abs(set_vel.twist.linear.x) > 2:
-		set_vel.twist.linear.x = np.sign(set_vel.twist.linear.z)*2
-	if abs(set_vel.twist.linear.y) > 2:
-		set_vel.twist.linear.y = np.sign(set_vel.twist.linear.y)*2
-	if abs(set_vel.twist.linear.z) > 2:
-		set_vel.twist.linear.z = np.sign(set_vel.twist.linear.z)*2
 
 	#Publish the commanded velocity
 	vel_pub.publish(set_vel)
@@ -127,10 +125,18 @@ def main():
 			rospy.logerr("failed to send mode command")
 
 	# Wait for keyboard input
-	x = raw_input('Press ENTER to disarm quad: ')
+	x = raw_input('Press ENTER to land quad: ')
 
+	while current_state.mode != "AUTO.LAND":
+        	set_mode = rospy.ServiceProxy('/mavros/set_mode',SetMode)
+        	mode = set_mode(custom_mode='AUTO.LAND')
+		rospy.wait_for_service('mavros/set_mode', service_timeout)
+		rospy.loginfo("ROS services are up")
+		if not mode.mode_sent:
+			rospy.logerr("failed to send mode command")
+
+	x = raw_input('Press ENTER to disarm quad: ')
 	# Disarm quad so the RTL function doesnt consume time
-	arm = rospy.ServiceProxy('/mavros/cmd/arming', mavros_msgs.srv.CommandBool)
 	arm(False)
 
 	# Keep program alive until we stop it
