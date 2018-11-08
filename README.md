@@ -3,13 +3,16 @@ The purpose of this respository is to simulate a quadrotor in Gazebo, and then e
 
 ## TO BEGIN:
 Ensure that the tool chain has been set up for the PX4 flight stack following the instructions on the wiki:
+
 [Tool Chain Installation](https://dev.px4.io/en/setup/dev_env_linux_ubuntu.html)
 
 Additionally, clone the Firmware into your home folder:
+
 [PX4 Firmware](https://github.com/PX4/Firmware)
 
 Finally, install Mavros globally using `apt get` on your machine. The bash scripts in this repository assume that mavros was not built from source in a catkin workspace.
-[Mavros Installation](https://dev.px4.io/en/ros/mavros_installation.html}
+
+[Mavros Installation](https://dev.px4.io/en/ros/mavros_installation.html})
 
 ## Using the code
 ### Launching Gazebo
