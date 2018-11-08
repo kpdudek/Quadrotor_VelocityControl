@@ -17,8 +17,8 @@ current_state = State()
 def obstacles():
 	global o,r
 	o = []
-	r = .5
-	o.append((1,1,1.5))
+	r = .7
+	o.append((1.2,1.2,.6))
 
 	return o,r
 
