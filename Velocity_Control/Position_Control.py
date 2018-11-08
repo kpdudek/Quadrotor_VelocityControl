@@ -11,13 +11,13 @@ from mavros_msgs.srv import CommandBool, ParamGet, SetMode
 from mavros_msgs.msg import State
 
 current_pose = PoseStamped()
-set_pos = TwistStamped()
+set_pos = PoseStamped()
 current_state = State()
 
 def pos_sub_callback(pose_sub_data):
-	global set_vel
+	global set_pos
 	global current_pose
-	global vel_pub
+	global pos_pub
 	current_pose = pose_sub_data
 
 	# Current Position, renamed to shorter variables
@@ -31,9 +31,9 @@ def pos_sub_callback(pose_sub_data):
 	zg = 4
 
 	# Publist to TwistStamped
-	set_pos.position.pose.x = xg
-	set_vel.position.pose.y = yg
-	set_vel.position.pose.z = zg
+	set_pos.pose.position.x = xg
+	set_pos.pose.position.y = yg
+	set_pos.pose.position.z = zg
 
 	pos_pub.publish(set_pos)
 
@@ -42,7 +42,7 @@ def state_callback(state_data):
 	current_state = state_data
 
 def main():
-	global vel_pub
+	global pos_pub
 	rospy.init_node('Velocity_Control', anonymous='True')
 
 	my_state = rospy.Subscriber('/mavros/state',State,state_callback)
