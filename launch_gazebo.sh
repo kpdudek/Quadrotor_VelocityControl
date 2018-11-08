@@ -18,7 +18,7 @@ firm=$HOME/Firmware
 roscore & #>/dev/null &
 
 # Sleep to allow the roscore to finish initializing, otherwise the launch files will not be able to locate the port
-sleep 6
+sleep 4
 
 x-terminal-emulator -e $HOME/launch_build_gazebo.sh &>/dev/null &
 x-terminal-emulator -e $HOME/launch_ros_gazebo.sh &>/dev/null &
