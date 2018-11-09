@@ -12,7 +12,7 @@ Additionally, clone the Firmware into your home folder:
 
 Finally, install Mavros globally using `apt get` on your machine. The bash scripts in this repository assume that mavros was not built from source in a catkin workspace.
 
-[Mavros Installation](https://dev.px4.io/en/ros/mavros_installation.html})
+[Mavros Installation](https://dev.px4.io/en/ros/mavros_installation.html)
 
 ## Using the code
 ### Launching Gazebo
