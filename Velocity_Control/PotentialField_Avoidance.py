@@ -14,13 +14,13 @@ current_pose = PoseStamped()
 set_vel = TwistStamped()
 current_state = State()
 
-def obstacles():
-	global o,r
-	o = []
-	r = .7
-	o.append((1.2,1.2,.6))
+def create_obstacles():
+	global obstacles,radius
+	obstacles = []
+	radius = 1
+	obstacles.append((3.5,3.5,1.5))
 
-	return o,r
+	return obstacles,radius
 
 def pos_sub_callback(pose_sub_data):
 	global set_vel
@@ -34,9 +34,9 @@ def pos_sub_callback(pose_sub_data):
 	z = current_pose.pose.position.z
 
 	# Goal position
-	xg = 2
-	yg = 2
-	zg = 4
+	xg = 5
+	yg = 5
+	zg = 3.5
 
 	# Position error between setpoint and current position
 	x_error = xg - x
@@ -49,16 +49,15 @@ def pos_sub_callback(pose_sub_data):
 	gz = .7*z_error
 
 	### Distance to obstacle
-	c = .0005 # Repulsion force
-	k = 1.3
+	c = 1 # Repulsion force
+	k = 1
 	# Vector of tuples corresponding to repulsive vectors
 	o_dists = []
-	for i in o:
-		x_error = (i[0] - x) - r
-		y_error = (i[1] - y) - r
-		z_error = (i[2] - z) - r
-
-
+	for i in obstacles:
+		x_error = (i[0] - x) - radius
+		y_error = (i[1] - y) - radius
+		z_error = (i[2] - z) - radius
+		#print('Errors: {} {} {}'.format(x_error,y_error,z_error))
 		o_x = -c/np.power(x_error*k,3)
 		o_y = -c/np.power(y_error*k,3)
 		o_z = -c/np.power(z_error*k,3)
@@ -102,7 +101,7 @@ def main():
 	rospy.init_node('Velocity_Control', anonymous='True')
 
 	# Initialize the obstacles
-	obstacles()
+	create_obstacles()
 
 	# Set up publishers and subscribers
 	my_state = rospy.Subscriber('/mavros/state',State,state_callback)
