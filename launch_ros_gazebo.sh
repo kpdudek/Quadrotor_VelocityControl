@@ -1,5 +1,7 @@
 #!/bin/bash
 
+source $HOME/.bashrc
+
 firm=$HOME/Firmware
 
 cd $firm

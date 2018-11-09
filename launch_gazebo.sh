@@ -10,9 +10,9 @@
 # and Gazebo 7
 # Additionally, the user must have initialized the toolchain for the PX4 Flight stack, and cloned the firmware
 
-echo "Bash Version ${BASH_VERSION}"
+echo "Bash Version: ${BASH_VERSION}"
 
-firm=$HOME/Firmware
+clone=$HOME/Quadrotor_VelocityControl
 
 
 roscore & #>/dev/null &
@@ -20,11 +20,11 @@ roscore & #>/dev/null &
 # Sleep to allow the roscore to finish initializing, otherwise the launch files will not be able to locate the port
 sleep 4
 
-x-terminal-emulator -e $HOME/launch_build_gazebo.sh &>/dev/null &
-x-terminal-emulator -e $HOME/launch_ros_gazebo.sh &>/dev/null &
-x-terminal-emulator -e $HOME/launch_mavros.sh &>/dev/null &
+x-terminal-emulator -e $clone/launch_build_gazebo.sh &>/dev/null &
+x-terminal-emulator -e $clone/launch_ros_gazebo.sh &>/dev/null &
+x-terminal-emulator -e $clone/launch_mavros.sh &>/dev/null &
 
-cd $HOME/Quadrotor_VelocityControl/Velocity_Control/
+cd $clone/Velocity_Control/
 
 
 
