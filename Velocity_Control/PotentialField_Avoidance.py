@@ -111,7 +111,7 @@ def main():
 
 	# Set the timeout for the ROS service checks
 	service_timeout = 30
-        rospy.loginfo("waiting for ROS services")
+	rospy.loginfo("waiting for ROS services")
 
 	# Ensure all services are running, and switch Quad to offboard
 	while current_state.mode != "OFFBOARD" or not current_state.armed:
