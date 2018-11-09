@@ -30,7 +30,7 @@ $ rostopic list
 ```
 A lengthy list of topics prefixes by /mavros/... should show up
 
-The control scrips can then be run by navigating to the folder /Quadrotor_VelocityControl/Velocity_Control and executing\
+The control scrips can then be run by navigating to the folder /Quadrotor_VelocityControl/Velocity_Control and executing
 ```
 $ python filename.py
 ```
