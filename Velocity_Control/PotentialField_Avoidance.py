@@ -17,15 +17,16 @@ current_state = State()
 def create_obstacles():
 	global obstacles,radius
 	obstacles = []
-	radius = 1
-	obstacles.append((3.5,3.5,1.5))
+	radius = .5  
+	obstacles.append((3.5,3.5,1))
 
-	return obstacles,radius
+	#return obstacles,radius
 
 def pos_sub_callback(pose_sub_data):
 	global set_vel
 	global current_pose
 	global vel_pub
+	global obstacles,radius
 	current_pose = pose_sub_data
 
 	# Current Position, renamed to shorter variables
@@ -34,9 +35,9 @@ def pos_sub_callback(pose_sub_data):
 	z = current_pose.pose.position.z
 
 	# Goal position
-	xg = 5
-	yg = 5
-	zg = 3.5
+	xg = 6
+	yg = 6
+	zg = 1.5
 
 	# Position error between setpoint and current position
 	x_error = xg - x
@@ -46,21 +47,23 @@ def pos_sub_callback(pose_sub_data):
 	# Velocity vector to get to goal
 	gx = .5*x_error
 	gy = .5*y_error
-	gz = .7*z_error
+	gz = 1.5*z_error
 
 	### Distance to obstacle
-	c = 1 # Repulsion force
+	c = 1   # Repulsion force
 	k = 1
 	# Vector of tuples corresponding to repulsive vectors
 	o_dists = []
 	for i in obstacles:
-		x_error = (i[0] - x) - radius
-		y_error = (i[1] - y) - radius
-		z_error = (i[2] - z) - radius
+		x_error = abs(i[0] - x) #- radius
+		y_error = abs(i[1] - y) #- radius
+		z_error = abs(i[2] - z) #- radius
+		if (x_error or y_error or z_error) < 0:
+			print('ERROR')
 		#print('Errors: {} {} {}'.format(x_error,y_error,z_error))
-		o_x = -c/np.power(x_error*k,3)
-		o_y = -c/np.power(y_error*k,3)
-		o_z = -c/np.power(z_error*k,3)
+		o_x = c/np.power(x_error*k,3)
+		o_y = c/np.power(y_error*k,3)
+		o_z = c/np.power(z_error*k,3)
 
 		o_dists.append((o_x,o_y,o_z))
 
@@ -70,10 +73,10 @@ def pos_sub_callback(pose_sub_data):
 	cy = gy
 	cz = gz
 	# Add each component from the repulsive forces
-	for y in o_dists:
-		cx += y[0]
-		cy += y[1]
-		cz += y[2]
+	for k in o_dists:
+		cx += -1*np.sign(cx)*k[0]
+		cy += -1*np.sign(cy)*k[1]
+		cz += -1*np.sign(cz)*k[2]
 
 
 	# Set limits on the velocity the quad can have
