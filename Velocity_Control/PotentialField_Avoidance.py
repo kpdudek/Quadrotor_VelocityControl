@@ -13,19 +13,22 @@ from mavros_msgs.msg import State
 current_pose = PoseStamped()
 set_vel = TwistStamped()
 current_state = State()
+global count
+count = 0
 
-def obstacles():
-	global o,r
-	o = []
-	r = .7
-	o.append((1.2,1.2,.6))
+def create_obstacles():
+	global obstacles,radius
+	obstacles = []
+	radius = 0.0
+	obstacles.append((1.0,1.0,7.0))
 
-	return o,r
+	#return obstacles,radius
 
 def pos_sub_callback(pose_sub_data):
 	global set_vel
 	global current_pose
 	global vel_pub
+	global obstacles,radius,count
 	current_pose = pose_sub_data
 
 	# Current Position, renamed to shorter variables
@@ -34,9 +37,9 @@ def pos_sub_callback(pose_sub_data):
 	z = current_pose.pose.position.z
 
 	# Goal position
-	xg = 2
-	yg = 2
-	zg = 4
+	xg = 0.0
+	yg = 0.0
+	zg = 15.0
 
 	# Position error between setpoint and current position
 	x_error = xg - x
@@ -49,19 +52,21 @@ def pos_sub_callback(pose_sub_data):
 	gz = .7*z_error
 
 	### Distance to obstacle
-	c = .0005 # Repulsion force
-	k = 1.3
+	c = .7   # Repulsion force
+	k = 1.0
 	# Vector of tuples corresponding to repulsive vectors
 	o_dists = []
-	for i in o:
-		x_error = (i[0] - x) - r
-		y_error = (i[1] - y) - r
-		z_error = (i[2] - z) - r
-
-
-		o_x = -c/np.power(x_error*k,3)
-		o_y = -c/np.power(y_error*k,3)
-		o_z = -c/np.power(z_error*k,3)
+	for i in obstacles:
+		x_error = abs(i[0] - x) - radius
+		y_error = abs(i[1] - y) - radius
+		z_error = abs(i[2] - z) - radius
+		if (x_error < 0.0) or (y_error < 0.0) or (z_error < 0.0):
+			print('ERROR : IN OBSTACLE : {}'.format(count))
+			print('{} {} {}'.format(x_error,y_error,z_error))
+			count += 1
+		o_x = c/np.power(x_error*k,2)
+		o_y = c/np.power(y_error*k,2)
+		o_z = c/np.power(z_error*k,2)
 
 		o_dists.append((o_x,o_y,o_z))
 
@@ -71,19 +76,19 @@ def pos_sub_callback(pose_sub_data):
 	cy = gy
 	cz = gz
 	# Add each component from the repulsive forces
-	for y in o_dists:
-		cx += y[0]
-		cy += y[1]
-		cz += y[2]
+	for k in o_dists:
+		cx += -1*np.sign(gx)*k[0]
+		cy += -1*np.sign(gy)*k[1]
+		cz += -1*np.sign(gz)*k[2]
 
 
 	# Set limits on the velocity the quad can have
-	if abs(cx) > 2:
-		cx = np.sign(cx)*2
-	if abs(cy) > 2:
-		cy = np.sign(cy)*2
-	if abs(cz) > 2:
-		cz = np.sign(cz)*2
+	if abs(cx) > 2.0:
+		cx = np.sign(cx)*2.0
+	if abs(cy) > 2.0:
+		cy = np.sign(cy)*2.0
+	if abs(cz) > 2.0:
+		cz = np.sign(cz)*2.0
 
 	# Set the message values to the velocity commands
 	set_vel.twist.linear.x = cx
@@ -102,7 +107,7 @@ def main():
 	rospy.init_node('Velocity_Control', anonymous='True')
 
 	# Initialize the obstacles
-	obstacles()
+	create_obstacles()
 
 	# Set up publishers and subscribers
 	my_state = rospy.Subscriber('/mavros/state',State,state_callback)
