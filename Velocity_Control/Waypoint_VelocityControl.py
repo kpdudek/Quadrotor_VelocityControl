@@ -34,25 +34,18 @@ def pos_sub_callback(pose_sub_data):
 	x_error = xg - x
 	y_error = yg - y
 	z_error = zg - z
-	#dist = math.sqrt(x_error**2 + y_error**2 + z_error**2)
-	#print(dist)
-
-	# Unit vecotor, variable means 'direction_command'
-	x_c = x_error# / dist
-	y_c = y_error# / dist
-	z_c = z_error# / dist
 
 	# Publist to TwistStamped
-	set_vel.twist.linear.x = .5*x_c
-	set_vel.twist.linear.y = .5*y_c
-	set_vel.twist.linear.z = .7*z_c
+	set_vel.twist.linear.x = .5*x_error
+	set_vel.twist.linear.y = .5*y_error
+	set_vel.twist.linear.z = .7*z_error
 
 	if abs(set_vel.twist.linear.x) > 2:
-		set_vel.twist.linear.x = np.sign(set_vel.twist.linear.z)*2
+		set_vel.twist.linear.x = np.sign(set_vel.twist.linear.x)*2
 	if abs(set_vel.twist.linear.y) > 2:
-                set_vel.twist.linear.y = np.sign(set_vel.twist.linear.y)*2
+        set_vel.twist.linear.y = np.sign(set_vel.twist.linear.y)*2
 	if abs(set_vel.twist.linear.z) > 2:
-                set_vel.twist.linear.z = np.sign(set_vel.twist.linear.z)*2
+        set_vel.twist.linear.z = np.sign(set_vel.twist.linear.z)*2
 
 	vel_pub.publish(set_vel)
 
@@ -63,7 +56,6 @@ def state_callback(state_data):
 def main():
 	global vel_pub
 	rospy.init_node('Velocity_Control', anonymous='True')
-
 	my_state = rospy.Subscriber('/mavros/state',State,state_callback)
 	vel_pub = rospy.Publisher('/mavros/setpoint_velocity/cmd_vel', TwistStamped, queue_size = 1)
 	local_position_subscribe = rospy.Subscriber('/mavros/local_position/pose', PoseStamped, pos_sub_callback)
