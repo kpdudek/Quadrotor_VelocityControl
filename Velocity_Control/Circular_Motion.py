@@ -36,10 +36,14 @@ def pos_sub_callback(pose_sub_data):
 	z_error = zg - z
 
 	# Publist to TwistStamped
-	#set_vel.twist.linear.x = .5*x_error
-	#set_vel.twist.linear.y = .5*y_error
+	set_vel.twist.linear.x = .5*x_error
+	set_vel.twist.linear.y = .5*y_error
 	set_vel.twist.linear.z = .7*z_error
-
+	
+	set_vel.twist.angular.x = 1
+	set_vel.twist.angular.y = 1
+	set_vel.twist.angular.z = 1
+	
 	if abs(set_vel.twist.linear.x) > 2:
 		set_vel.twist.linear.x = np.sign(set_vel.twist.linear.x)*2
 	if abs(set_vel.twist.linear.y) > 2:
